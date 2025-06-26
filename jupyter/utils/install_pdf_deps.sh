@@ -17,7 +17,8 @@ curl -L https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz -o i
 zcat < install-tl-unx.tar.gz | tar xf -
 cd install-tl-2*
 perl ./install-tl --no-interaction --scheme=scheme-small --texdir=/usr/local/texlive
-cd /usr/local/texlive/bin/"$(uname -m)-linux"
+mv /usr/local/texlive/bin/"$(uname -m)-linux" /usr/local/texlive/bin/linux
+cd /usr/local/texlive/bin/linux
 ./tlmgr install tcolorbox pdfcol adjustbox titling enumitem soul ucs collection-fontsrecommended
 
 # pandoc installation
