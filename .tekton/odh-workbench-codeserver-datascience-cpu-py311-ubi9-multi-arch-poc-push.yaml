@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: odh-multi-arch-poc
-    appstudio.openshift.io/component: odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch-poc
+    appstudio.openshift.io/component: odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch-poc-on-push
+  name: odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch-poc:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch:{{revision}}
   - name: build-platforms
     value:
     - linux/x86_64
@@ -612,7 +612,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch-poc
+    serviceAccountName: build-pipeline-odh-workbench-codeserver-datascience-cpu-py311-ubi9-multi-arch
   workspaces:
   - name: git-auth
     secret:
