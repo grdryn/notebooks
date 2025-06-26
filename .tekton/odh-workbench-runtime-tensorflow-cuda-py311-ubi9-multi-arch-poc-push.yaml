@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: odh-multi-arch-poc
-    appstudio.openshift.io/component: odh-workbench-jupyter-trustyai-cpu-py311-ubi9-multi-arch-poc
+    appstudio.openshift.io/component: odh-workbench-runtime-tensorflow-cuda-py311-ubi9
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-jupyter-trustyai-cpu-py311-ubi9-multi-arch-poc-on-push
+  name: odh-workbench-runtime-tensorflow-cuda-py311-ubi9-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-jupyter-trustyai-cpu-py311-ubi9-multi-arch-poc:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-runtime-tensorflow-cuda-py311-ubi9-multi-arch-poc:{{revision}}
   - name: build-platforms
     value:
     - linux/x86_64
@@ -31,7 +31,7 @@ spec:
     # - linux/ppc64le
     # - linux/s390x
   - name: dockerfile
-    value: jupyter/trustyai/ubi9-python-3.11/Dockerfile.cpu
+    value: runtimes/tensorflow/ubi9-python-3.11/Dockerfile.cuda
   pipelineSpec:
     description: |
       This pipeline is ideal for building multi-arch container images from a Containerfile while maintaining trust after pipeline customization.
@@ -612,7 +612,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-jupyter-trustyai-cpu-py311-ubi9-multi-arch-poc
+    serviceAccountName: build-pipeline-odh-workbench-runtime-tensorflow-cuda-py311-ubi9-multi-arch-poc
   workspaces:
   - name: git-auth
     secret:
