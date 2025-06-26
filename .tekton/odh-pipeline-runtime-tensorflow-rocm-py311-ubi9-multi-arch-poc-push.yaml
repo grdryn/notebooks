@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1
+)apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: odh-multi-arch-poc
-    appstudio.openshift.io/component: odh-workbench-runtime-datascience-cpu-py311-ubi9-multi-arch-poc
+    appstudio.openshift.io/component: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-runtime-datascience-cpu-py311-ubi9-multi-arch-poc-on-push
+  name: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,15 +23,15 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-runtime-datascience-cpu-py311-ubi9-multi-arch-poc:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-pipeline-runtime-tensorflow-rocm-py311-ubi9-multi-arch-poc:{{revision}}
   - name: build-platforms
     value:
     - linux/x86_64
     - linux/arm64
-    - linux/ppc64le
-    - linux/s390x
+    # - linux/ppc64le
+    # - linux/s390x
   - name: dockerfile
-    value: runtimes/datascience/ubi9-python-3.11/Dockerfile.cpu
+    value: runtimes/rocm-tensorflow/ubi9-python-3.11/Dockerfile.rocm
   pipelineSpec:
     description: |
       This pipeline is ideal for building multi-arch container images from a Containerfile while maintaining trust after pipeline customization.
@@ -248,7 +248,7 @@ spec:
         - name: name
           value: buildah-remote-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.4@sha256:01683db105fe4e6577c6df87686588bfbf0949cd40f8cb01d69c2ad834e9b9cf
+          value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.4@sha256:ae87472f60dbbf71e4980cd478c92740c145fd9e44acbb9b164a21f1bcd61aa3
         - name: kind
           value: task
         resolver: bundles
@@ -462,7 +462,7 @@ spec:
         - name: name
           value: sast-coverity-check-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-sast-coverity-check-oci-ta:0.3@sha256:dda889f85faa30eb18db4f195bc03428e8913afa14624552d2cb9f714c786dbf
+          value: quay.io/konflux-ci/tekton-catalog/task-sast-coverity-check-oci-ta:0.3@sha256:34ac8e9ddfaafedaa61a7c3c95d86e674556bfe3da488d94c3bf28fff9875b38
         - name: kind
           value: task
         resolver: bundles
@@ -612,7 +612,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-runtime-datascience-cpu-py311-ubi9-multi-arch-poc
+    serviceAccountName: build-pipeline-odh-pipeline-runtime-tensorflow-rocm-py311-ubi9-multi-arch-poc
   workspaces:
   - name: git-auth
     secret:
