@@ -1,0 +1,13 @@
+[cuda]
+name=cuda
+baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA
+
+[cuda-sbsa]
+name=cuda-sbsa
+baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel9/sbsa
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA
