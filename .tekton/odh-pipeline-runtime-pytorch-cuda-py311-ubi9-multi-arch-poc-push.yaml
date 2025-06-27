@@ -31,7 +31,7 @@ spec:
     # - linux/ppc64le
     # - linux/s390x
   - name: dockerfile
-    value: runtimes/pytorch/ubi9-python-3.11)/Dockerfile.cuda
+    value: runtimes/pytorch/ubi9-python-3.11/Dockerfile.cuda
   pipelineSpec:
     description: |
       This pipeline is ideal for building multi-arch container images from a Containerfile while maintaining trust after pipeline customization.
