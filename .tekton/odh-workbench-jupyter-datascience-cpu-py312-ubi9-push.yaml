@@ -2,14 +2,14 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/notebooks?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/grdryn/notebooks?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     build.appstudio.openshift.io/build-nudge-files: "manifests/base/params-latest.env"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "main"
+      == "multi-arch-konflux"
       && !("manifests/base/params-latest.env".pathChanged())
       && ( ".tekton/odh-workbench-jupyter-datascience-cpu-py312-ubi9-push.yaml".pathChanged() ||
            "jupyter/utils/**".pathChanged() ||
@@ -17,10 +17,10 @@ metadata:
            "jupyter/minimal/ubi9-python-3.12/start-notebook.sh".pathChanged() )
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-workbench-jupyter-datascience-cpu-py312-ubi9
+    appstudio.openshift.io/application: odh-multi-arch-poc
+    appstudio.openshift.io/component: odh-workbench-jupyter-datascience-cpu-py312-ubi9-multi-arch-poc
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-jupyter-datascience-cpu-py312-ubi9-on-push
+  name: odh-workbench-jupyter-datascience-cpu-py312-ubi9-multi-arch-poc-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -29,7 +29,13 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-workbench-jupyter-datascience-cpu-py312-ubi9:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-jupyter-datascience-cpu-py312-ubi9-multi-arch-poc:{{revision}}
+  - name: build-platforms
+    value:
+    - linux-cxlarge/amd64
+    - linux-cxlarge/arm64
+    # - linux/ppc64le
+    # - linux/s390x
   - name: dockerfile
     value: jupyter/datascience/ubi9-python-3.12/Dockerfile.cpu
   - name: path-context
@@ -38,17 +44,6 @@ spec:
     value:
     - '{{target_branch}}-{{revision}}'
     - 2025a-v1.34
-  taskRunSpecs:
-    - pipelineTaskName: build-container
-      stepSpecs:
-        - name: build
-          computeResources:
-            requests:
-              cpu: '8'
-              memory: 16Gi
-            limits:
-              cpu: '16'
-              memory: 32Gi
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -69,28 +64,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-    - name: send-slack-notification
-      params:
-      - name: message
-        value: "$(tasks.rhoai-init.results.slack-message-failure-text)"
-      - name: secret-name
-        value: slack-secret
-      - name: key-name
-        value: slack-webhook
-      taskRef:
-        params:
-        - name: name
-          value: slack-webhook-notification
-        - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-slack-webhook-notification:0.1@sha256:dc17b70633363d78414b8c06dc1660d25742935f106a6116995638e1210c2730
-        - name: kind
-          value: task
-        resolver: bundles
-      when:
-      - input: $(tasks.status)
-        operator: in
-        values:
-        - "Failed"
     params:
     - description: Source Repository URL
       name: git-url
@@ -136,7 +109,7 @@ spec:
       description: Build a source image.
       name: build-source-image
       type: string
-    - default: "false"
+    - default: "true"
       description: Add built image into an OCI image index
       name: build-image-index
       type: string
@@ -153,6 +126,12 @@ spec:
         VMs
       name: privileged-nested
       type: string
+    - default:
+      - linux/x86_64
+      description: List of platforms to build the container images on. The available
+        set of values is determined by the configuration of the multi-platform-controller.
+      name: build-platforms
+      type: array
     results:
     - description: ""
       name: IMAGE_URL
@@ -277,7 +256,12 @@ spec:
         workspace: git-auth
       - name: netrc
         workspace: netrc
-    - name: build-container
+    - matrix:
+        params:
+        - name: PLATFORM
+          value:
+          - $(params.build-platforms)
+      name: build-images
       params:
       - name: IMAGE
         value: $(params.output-image)
@@ -304,6 +288,8 @@ spec:
         value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+      - name: IMAGE_APPEND_PLATFORM
+        value: "true"
       runAfter:
       - prefetch-dependencies
       taskRef:
@@ -332,9 +318,9 @@ spec:
         value: $(params.build-image-index)
       - name: IMAGES
         value:
-        - $(tasks.build-container.results.IMAGE_URL)@$(tasks.build-container.results.IMAGE_DIGEST)
+        - $(tasks.build-images.results.IMAGE_URL)@$(tasks.build-images.results.IMAGE_DIGEST)
       runAfter:
-      - build-container
+      - build-images
       taskRef:
         params:
         - name: name
@@ -676,7 +662,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-jupyter-datascience-cpu-py312-ubi9
+    serviceAccountName: build-pipeline-odh-workbench-jupyter-datascience-cpu-py312-ubi9-multi-arch-poc
   workspaces:
   - name: git-auth
     secret:
